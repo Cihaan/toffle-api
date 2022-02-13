@@ -3,6 +3,6 @@ import authRouter from "./auth"
 
 const routes = Router()
 
-routes.use("/register", authRouter)
+routes.use("/all", authRouter)
 
 export default routes

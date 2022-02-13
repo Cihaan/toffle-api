@@ -1,11 +1,13 @@
 import express from 'express'
 import routes from '../routes/route'
-import config from 'config'
 import connect from './utils/connect'
 import cors from 'cors'
+import prisma from './utils/connect'
+
 
 const app = express()
-const PORT = config.get<number>('port')
+require('dotenv').config()
+const PORT = process.env.PORT
 
 
 app.use(express.json())
@@ -17,8 +19,10 @@ app.use((req, res, next) => {
 });
 
 
+
+
 app.listen(PORT, async () => {
+    
     console.log(`App is running at http://localhost:${PORT}`);
 
-    await connect()
 })
