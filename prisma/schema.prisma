@@ -25,8 +25,8 @@ model person {
   id         Int        @id @default(autoincrement())
   username   String     @unique @db.VarChar(50)
   email      String     @unique @db.VarChar(60)
-  password   String     @db.VarChar(50)
-  created_on DateTime   @db.Timestamp(6)
+  password   String     @db.VarChar(200)
+  created_on DateTime   @db.Date
   to_watch   to_watch[]
   watched    watched[]
 }
