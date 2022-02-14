@@ -1,40 +1,91 @@
-const express = require('express')
+const express = require("express");
 const router = express.Router();
-const bcrypt = require('bcrypt')
-const prisma = require('../prisma')
-var bodyParser = require('body-parser')
+const bcrypt = require("bcrypt");
+const prisma = require("../prisma");
+var bodyParser = require("body-parser");
+const jwt = require("jsonwebtoken");
+const authenticateToken = require("../middleware/index")
+require('dotenv')
+
+/**
+ * REGISTER USER
+ */
+router.post("/register", async (req, res) => {
+  let body = req.body;
+  var date = new Date();
+  date.toLocaleDateString("fr");
+
+  try {
+    const salt = await bcrypt.genSalt();
+    const hashed = await bcrypt.hash(body.password, salt);
+    const newUser = await prisma.person.create({
+      data: {
+        username: body.username,
+        email: body.email,
+        password: hashed,
+        created_on: date,
+      },
+    });
+    res.json(newUser);
+  } catch (e) {
+    res.status(500).send("Credentials already used");
+  }
+});
+
+/**
+ * LOGIN USER
+ */
+router.post("/login", async (req, res) => {
+  let body = req.body;
+
+  if (body.email === null && body.password === null) {
+    return res.status(500).send("Provide valid credentials");
+  }
+
+  const user = await prisma.person.findUnique({
+    where: {
+      email: body.email,
+    },
+  });
+
+  if (user == null) {
+    return res.status(500).send("Provide valid credentials");
+  }
+
+  try {
+    if (await bcrypt.compare(body.password, user.password)) {
+
+      const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
+      res.json({accessToken: accessToken})
+
+    } else {
+      res.status(500).send("Provide valid credentials");
+    }
+    
+  } catch (e) {
+    throw e;
+  }
+});
 
 
-const salt = async function() {
-    await bcrypt.genSalt()
-}
-
-router.get('/', async (req, res) => {
-    let azer = prisma.person.findMany({})
-    res.send(azer)
-})
-
-//register user
-router.post('/register', async (req, res) => {
-    let body = req.body
-    console.log("ici");
-
+/**
+ * TEST TOKEN
+ */
+router.get('/movie', authenticateToken, async (req, res) => {
     try {
-
-        console.log("ici");
-        const hashed = await bcrypt.hash(body.password)
-        console.log("ici");
-        const newUser = prisma.person.create({
-            data: {
-                username: body.username,
-                email: body.email,
-                password: hashed
-            }
+        const to_watch = await prisma.to_watch.findMany({
+            where: {
+                idperson: 1
+            },
         })
-        res.json(newUser)
-    } catch(error) {
-
+        res.json(to_watch)
+    } catch (e) {
+        throw e
     }
 })
 
-module.exports = router
+router.put('/update', authenticateToken, async (req, res) => {
+
+})
+
+module.exports = router;
