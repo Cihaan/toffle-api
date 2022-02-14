@@ -8,10 +8,13 @@ const PORT = 5000
 const app = express()
 
 
+
 app.use(express.json())
 app.use(cookie_parser('1234'))
 app.use(routes)
-app.use(cors())
+app.use(cors({
+    origin:'*',
+}))
 
 app.get("/", (req, res) => {
     res.send("azer")

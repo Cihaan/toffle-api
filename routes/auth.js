@@ -26,7 +26,7 @@ router.post("/register", async (req, res) => {
         created_on: date,
       },
     });
-    res.json(newUser);
+    res.status(200).json(newUser);
   } catch (e) {
     res.status(500).send("Credentials already used");
   }
