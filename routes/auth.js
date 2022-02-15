@@ -6,7 +6,8 @@ var bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
 const authenticateToken = require("../middleware/index");
 require("dotenv");
-var cors = require('cors')
+var cors = require('cors');
+const { error } = require("console");
 
 
 router.use(cors())
@@ -20,7 +21,10 @@ router.post("/register", async (req, res) => {
   date.toLocaleDateString("fr");
 
   if (body.username.length === 0 || body.email.length === 0 || body.password.length === 0) {
-    return res.status(500).json({"msg": "Enter valid data"})
+    res.status(400).json({
+      type: "Bad credentials",
+      message: "Provide valid credentials",
+    });
   }
 
   try {
@@ -36,7 +40,7 @@ router.post("/register", async (req, res) => {
     });
     res.status(200).json(newUser);
   } catch (e) {
-    res.status(500).send("Credentials already used");
+    res.status(500).send(e.message);
   }
 });
 
@@ -47,7 +51,7 @@ router.post("/login", async (req, res) => {
   let body = req.body;
 
   if (body.email === null || body.password === null || body.email.length === 0 || body.password.length === 0) {
-    return res.status(500).send("Provide valid credentials");
+    return res.status(500).send({"message": "Enter valid data"});
   }
 
   const user = await prisma.person.findUnique({
@@ -57,7 +61,7 @@ router.post("/login", async (req, res) => {
   });
 
   if (user == null) {
-    return res.status(500).send("Provide valid credentials");
+    return res.status(500).send({"message": "Provide valid credentials"});
   }
 
   try {
@@ -65,7 +69,7 @@ router.post("/login", async (req, res) => {
       const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
       res.json({ accessToken: accessToken });
     } else {
-      res.status(500).send("Provide valid credentials");
+      res.status(500).send({"message": "Provide valid credentials"});
     }
   } catch (e) {
     throw e;
