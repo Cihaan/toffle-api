@@ -4,8 +4,12 @@ const bcrypt = require("bcrypt");
 const prisma = require("../prisma");
 var bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
-const authenticateToken = require("../middleware/index")
-require('dotenv')
+const authenticateToken = require("../middleware/index");
+require("dotenv");
+var cors = require('cors')
+
+
+router.use(cors())
 
 /**
  * REGISTER USER
@@ -14,6 +18,10 @@ router.post("/register", async (req, res) => {
   let body = req.body;
   var date = new Date();
   date.toLocaleDateString("fr");
+
+  if (body.username.length === 0 || body.email.length === 0 || body.password.length === 0) {
+    return res.status(500).json({"msg": "Enter valid data"})
+  }
 
   try {
     const salt = await bcrypt.genSalt();
@@ -38,7 +46,7 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   let body = req.body;
 
-  if (body.email === null && body.password === null) {
+  if (body.email === null || body.password === null || body.email.length === 0 || body.password.length === 0) {
     return res.status(500).send("Provide valid credentials");
   }
 
@@ -54,38 +62,32 @@ router.post("/login", async (req, res) => {
 
   try {
     if (await bcrypt.compare(body.password, user.password)) {
-
       const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
-      res.json({accessToken: accessToken})
-
+      res.json({ accessToken: accessToken });
     } else {
       res.status(500).send("Provide valid credentials");
     }
-    
   } catch (e) {
     throw e;
   }
 });
 
-
 /**
  * TEST TOKEN
  */
-router.get('/movie', authenticateToken, async (req, res) => {
-    try {
-        const to_watch = await prisma.to_watch.findMany({
-            where: {
-                idperson: 1
-            },
-        })
-        res.json(to_watch)
-    } catch (e) {
-        throw e
-    }
-})
+router.get("/movie", authenticateToken, async (req, res) => {
+  try {
+    const to_watch = await prisma.to_watch.findMany({
+      where: {
+        idperson: 1,
+      },
+    });
+    res.json(to_watch);
+  } catch (e) {
+    throw e;
+  }
+});
 
-router.put('/update', authenticateToken, async (req, res) => {
-
-})
+router.put("/update", authenticateToken, async (req, res) => {});
 
 module.exports = router;
