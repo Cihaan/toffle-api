@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 require('dotenv')
 
 function authenticateToken(req, res, next) {
+    console.log("azer");
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
 
