@@ -6,13 +6,12 @@ var bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
 const authenticateToken = require("../middleware/index");
 require("dotenv");
-var cors = require('cors');
+var cors = require("cors");
 const { error } = require("console");
 const cookieParser = require("cookie-parser");
-router.use(cookieParser())
+router.use(cookieParser());
 
-
-router.use(cors())
+router.use(cors());
 
 /**
  * REGISTER USER
@@ -22,7 +21,14 @@ router.post("/register", async (req, res) => {
   var date = new Date();
   date.toLocaleDateString("fr");
 
-  if (body.username.length === 0 || body.email.length === 0 || body.password.length === 0) {
+  if (
+    body.username.length === 0 ||
+    body.email.length === 0 ||
+    body.password.length === 0 ||
+    body.username === null ||
+    body.email === null ||
+    body.password === null
+  ) {
     res.status(400).json({
       type: "No data provided",
       message: "Provide valid data",
@@ -55,8 +61,13 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   let body = req.body;
 
-  if (body.email === null || body.password === null || body.email.length === 0 || body.password.length === 0) {
-    return res.status(500).json({
+  if (
+    body.email === null ||
+    body.password === null ||
+    body.email.length === 0 ||
+    body.password.length === 0
+  ) {
+    return res.status(400).json({
       type: "No data provided",
       message: "Provide valid data",
     });
@@ -94,14 +105,14 @@ router.post("/login", async (req, res) => {
 /**
  * TEST TOKEN
  */
- router.get("/user", authenticateToken, async (req, res) => {
+router.get("/user", authenticateToken, async (req, res) => {
   try {
     const user = await prisma.person.findMany({
       where: {
         id: req.user.id,
       },
     });
-    user[0].password = null
+    user[0].password = null;
     res.json(user);
   } catch (e) {
     throw e;
