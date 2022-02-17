@@ -7,9 +7,7 @@ const jwt = require("jsonwebtoken");
 const authenticateToken = require("../middleware/index");
 require("dotenv");
 var cors = require("cors");
-const { error } = require("console");
-const cookieParser = require("cookie-parser");
-router.use(cookieParser());
+const validator = require("email-validator")
 
 router.use(cors());
 
@@ -32,6 +30,16 @@ router.post("/register", async (req, res) => {
     res.status(400).json({
       type: "No data provided",
       message: "Provide valid data",
+    });
+  }
+
+  console.log(body.email);
+  console.log(validator.validate(body.email));
+
+  if(!validator.validate(body.email)) {
+    return res.status(400).json({
+      type: "Validation error",
+      message: "Provide a valid email",
     });
   }
 
@@ -103,7 +111,7 @@ router.post("/login", async (req, res) => {
 });
 
 /**
- * TEST TOKEN
+ * GET USER INFO
  */
 router.get("/user", authenticateToken, async (req, res) => {
   try {
@@ -134,7 +142,5 @@ router.get("/movie", authenticateToken, async (req, res) => {
     throw e;
   }
 });
-
-router.put("/update", authenticateToken, async (req, res) => {});
 
 module.exports = router;

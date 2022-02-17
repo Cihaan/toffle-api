@@ -5,12 +5,20 @@ const prisma = require("../prisma");
 const authenticateToken = require("../middleware/index");
 var cors = require("cors");
 require("dotenv");
+const validator = require("email-validator")
 
 router.use(cors());
 
 router.post("/info/:id", authenticateToken, async (req, res) => {
   let body = req.body;
   const id = parseInt(req.params.id);
+
+  if(validator.validate(body.email)) {
+    return res.status(400).json({
+      type: "Validation error",
+      message: "Provide a valid email",
+    });
+  }
 
   try {
     const newUser = await prisma.person.update({
@@ -63,11 +71,10 @@ router.post("/pwd/:id", authenticateToken, async (req, res) => {
       message: "Your informations have been updated successfully",
     });
   } catch (error) {
-    throw error
-    // res.status(400).json({
-    //   type: "Oops",
-    //   message: "The provided passwords don't match",
-    // });
+    res.status(400).json({
+      type: "Oops",
+      message: "Coudn't fetch the API",
+    });
   }
 });
 
