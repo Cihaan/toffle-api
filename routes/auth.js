@@ -101,6 +101,7 @@ router.post("/login", async (req, res) => {
         id: req.user.id,
       },
     });
+    user[0].password = null
     res.json(user);
   } catch (e) {
     throw e;
